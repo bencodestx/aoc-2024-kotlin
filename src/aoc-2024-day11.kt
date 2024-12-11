@@ -22,7 +22,7 @@ private fun howManyStones(stone: Long, blinks: Int): Long =
 private fun howManyStones(stone: String, blinks: Int): Long = howManyStones(stone.toLong(), blinks)
 
 fun main() {
-    val initialStones = readln().split(' ').map { it.toLong() }
+    val initialStones = readln().split(' ')
 
     val part1 = initialStones.sumOf { howManyStones(it, 25) }
     println("2024 Day 11 Part 1: $part1")

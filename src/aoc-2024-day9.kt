@@ -1,102 +1,83 @@
-import kotlin.io.path.Path
-import kotlin.io.path.readText
-
-data class File(val fileId: Long, val position: Long, val length: Long, val isMoved: Boolean = false)
-
 fun main() {
-    var currentPosition: Long = 0
-    val input = ArrayList<File>()
-    Path("src/aoc-2024-day9.txt")
-        .readText()
-        .filter { it.isDigit() }
-        .map { it.toString().toLong() }
-        .forEachIndexed { index, length ->
-            val filePosition = currentPosition
-            currentPosition += length
-            if (0 == index % 2) {
-                input.add(File(fileId = index.toLong() / 2, position = filePosition, length = length))
-            }
-        }
+    val input = readln()
+        .map { it.toString().toInt() }
 
-    val part1ResultingFiles = ArrayList<File>()
-    part1ResultingFiles.add(input.first())
-    val part1RemainingInput = input.drop(1).toMutableList()
-    while (part1RemainingInput.isNotEmpty()) {
-        val prev = part1ResultingFiles.last()
-        val nextPosition = prev.position + prev.length
-        val contiguousFreeSpace = part1RemainingInput.first().position - nextPosition
-        if (contiguousFreeSpace > 0) {
-            val last = part1RemainingInput.last()
-            if (contiguousFreeSpace >= last.length) {
-                // Move entire last file to output
-                part1ResultingFiles.add(File(fileId = last.fileId, position = nextPosition, length = last.length))
-                part1RemainingInput.removeLast()
+    val blockAllocation = input
+        .flatMapIndexed { index, length ->
+            val isEven = 0 == index % 2
+            if (isEven) {
+                val fileId = index / 2
+                (0..<length)
+                    .map { fileId }
             } else {
-                // Move part of last file to output
-                part1ResultingFiles.add(
-                    File(
-                        fileId = last.fileId,
-                        position = nextPosition,
-                        length = contiguousFreeSpace
-                    )
-                )
-                part1RemainingInput.removeLast()
-                part1RemainingInput.add(
-                    File(
-                        fileId = last.fileId,
-                        position = last.position,
-                        length = last.length - contiguousFreeSpace
-                    )
-                )
+                (0..<length)
+                    .map { null }
             }
-        } else {
-            check(contiguousFreeSpace == 0L) { "How do we have negative free space? $contiguousFreeSpace" }
-            // Move the first input to output
-            part1ResultingFiles.add(part1RemainingInput.first())
-            part1RemainingInput.removeFirst()
-        }
-    }
+        }.toMutableList()
 
-    val part1 = checksum(part1ResultingFiles)
+    val part1 = generateSequence {
+        while (blockAllocation.isNotEmpty()) {
+            if (blockAllocation.last() == null) {
+                blockAllocation.removeLast()
+            } else if (blockAllocation.first() == null) {
+                blockAllocation.removeFirst()
+                return@generateSequence blockAllocation.removeLast()
+            } else {
+                return@generateSequence blockAllocation.removeFirst()
+            }
+        }
+        null
+    }
+        .mapIndexed { position, fileId -> position * fileId }
+        .map { it.toLong() }
+        .sum()
+
     println("2024 Day 9 Part 1: $part1")
 
-    val part2RemainingInput = input.toMutableList()
-    val part2Output = ArrayList<File>()
+    val filesAndFreeSpace = input
+        .runningFold(Pair(0, 0)) { previous, length -> Pair(previous.first + previous.second, length) }
+        .drop(1)
+        .mapIndexed { index, location ->
+            val isEven = 0 == index % 2
+            if (isEven) {
+                val fileId = index / 2
+                Pair(fileId, location)
+            } else {
+                Pair(null, location)
+            }
+        }
 
-    while (part2RemainingInput.size > 2) {
-        val last = part2RemainingInput.last()
-        val insertAfter = if (last.isMoved) null else part2RemainingInput
-            .asSequence()
-            .windowed(2)
-            .map { (first, second) ->
-                second.position - (first.position + first.length)
-            }
-            .onEach {
-                check(it >= 0L) { "How do we have negative free space? $it" }
-            }
-            .withIndex()
-            .firstOrNull { it.value >= last.length }
-        if (insertAfter == null) {
-            part2Output.add(last)
-        } else {
-            val fileToInsertAfter = part2RemainingInput[insertAfter.index]
-            val newPosition = fileToInsertAfter.position + fileToInsertAfter.length
-            part2RemainingInput.add(
-                insertAfter.index + 1,
-                File(fileId = last.fileId, position = newPosition, length = last.length, isMoved = true)
+    val files = filesAndFreeSpace
+        .mapNotNull { maybeFile ->
+            if (maybeFile.first == null || maybeFile.second.second == 0) null else Pair(
+                maybeFile.first!!,
+                maybeFile.second
             )
         }
-        part2RemainingInput.removeLast()
-    }
-    part2Output.addAll(part2RemainingInput)
+    val freeSpace =
+        filesAndFreeSpace
+            .mapNotNull { (fileId, location) -> if (fileId == null) location else null }
+            .toTypedArray()
 
-    val part2 = checksum(part2Output)
+    val part2 = files
+        .reversed()
+        .map { (fileId, location) ->
+            val holeIndex = freeSpace.indexOfFirst { hole -> hole.first < location.first && hole.second >= location.second }
+            if (holeIndex == -1) {
+                Pair(fileId, location)
+            } else {
+                val freeSpaceToOccupy = freeSpace[holeIndex]
+                freeSpace[holeIndex] =
+                    Pair(freeSpaceToOccupy.first + location.second, freeSpaceToOccupy.second - location.second)
+                Pair(fileId, Pair(freeSpaceToOccupy.first, location.second))
+            }
+        }
+        .flatMap { (fileId, location) ->
+            (location.first..<(location.first + location.second))
+                .map { it * fileId }
+                .map { it.toLong() }
+        }
+        .sum()
+
     println("2024 Day 9 Part 2: $part2")
 }
-
-private fun checksum(files: ArrayList<File>) = files
-    .flatMap { file ->
-        (file.position..<file.position + file.length)
-            .map { it * file.fileId }
-    }
-    .sum()

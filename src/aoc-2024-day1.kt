@@ -1,10 +1,7 @@
-import kotlin.io.path.Path
-import kotlin.io.path.readLines
 import kotlin.math.abs
 
 fun main() {
-    val lines = Path("src/aoc-2024-day1.txt")
-        .readLines()
+    val lines = generateSequence { readlnOrNull() }.toList()
 
     val (left, right) = lines
         .map {
@@ -24,6 +21,6 @@ fun main() {
         .groupingBy { it }
         .eachCount()
     val part2 = left
-        .sumOf { it * occurrences.getOrDefault(it, 0) }
+        .sumOf { it * (occurrences.get(it) ?: 0) }
     println("2024 Day 1 Part 2: $part2")
 }

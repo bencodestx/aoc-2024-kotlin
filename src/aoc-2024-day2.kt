@@ -1,16 +1,14 @@
-import kotlin.io.path.Path
-import kotlin.io.path.readLines
 import kotlin.math.max
 import kotlin.math.min
 
 fun main() {
-    val reports = Path("src/aoc-2024-day2.txt")
-        .readLines()
+    val reports = generateSequence { readlnOrNull() }
         .map { line ->
             line
                 .split(' ')
                 .map { it.toLong() }
         }
+        .toList()
 
     val part1 = reports.count { report -> isValid(report) }
     println("2024 Day 2 Part 1: $part1")

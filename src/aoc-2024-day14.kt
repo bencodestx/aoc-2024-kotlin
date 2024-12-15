@@ -50,8 +50,7 @@ fun main() {
 
     val part1 = robotEnds
         .map { it.first }
-        .fold(listOf(0, 0, 0, 0)) {
-            counts, robot ->
+        .fold(listOf(0, 0, 0, 0)) { counts, robot ->
             val top = robot.first < midpoints.first
             val bottom = robot.first > midpoints.first
             val left = robot.second < midpoints.second
@@ -77,7 +76,7 @@ fun main() {
     (0..<space.first).map { row ->
         (0..<space.second)
             .map { column -> Position(row, column) }
-            .forEach { pixel -> if (eggPositions.contains(pixel)) print('*') else print(' ')}
+            .forEach { pixel -> if (eggPositions.contains(pixel)) print('*') else print(' ') }
         print('\n')
     }
 }

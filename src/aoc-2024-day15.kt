@@ -29,12 +29,12 @@ private fun canApplyWideHorizontalMove(
     start: Position,
     move: Movement
 ): Boolean {
-    val oneAway = move(start)
-    val atOneAway = warehouse[oneAway.first][oneAway.second]
-    return when (atOneAway) {
+    val end = move(start)
+    val atEnd = warehouse[end.first][end.second]
+    return when (atEnd) {
         '#' -> false
         '.' -> true
-        else -> canApplyWideHorizontalMove(warehouse, oneAway, move)
+        else -> canApplyWideHorizontalMove(warehouse, end, move)
     }
 }
 
@@ -43,12 +43,12 @@ private fun applyWideHorizontalMove(
     start: Position,
     move: Movement
 ) {
-    val oneAway = move(start)
-    val atOneAway = warehouse[oneAway.first][oneAway.second]
-    if ('.' != atOneAway) {
-        applyWideHorizontalMove(warehouse, oneAway, move)
+    val end = move(start)
+    val atEnd = warehouse[end.first][end.second]
+    if ('.' != atEnd) {
+        applyWideHorizontalMove(warehouse, end, move)
     }
-    warehouse[oneAway.first][oneAway.second] = warehouse[start.first][start.second]
+    warehouse[end.first][end.second] = warehouse[start.first][start.second]
     warehouse[start.first][start.second] = '.'
 }
 
@@ -57,15 +57,15 @@ private fun canApplyWideVerticalMove(
     start: Position,
     move: Movement
 ): Boolean {
-    val oneAway = move(start)
-    return when (val atOneAway = warehouse[oneAway.first][oneAway.second]) {
+    val end = move(start)
+    return when (val atEnd = warehouse[end.first][end.second]) {
         '#' -> false
         '.' -> true
-        '[' -> canApplyWideVerticalMove(warehouse, oneAway, move)
-                    && canApplyWideVerticalMove(warehouse, right(oneAway), move)
-        ']' -> canApplyWideVerticalMove(warehouse, oneAway, move)
-                    && canApplyWideVerticalMove(warehouse, left(oneAway), move)
-        else -> throw Exception("Unexpected move target '$atOneAway'")
+        '[' -> canApplyWideVerticalMove(warehouse, end, move)
+                    && canApplyWideVerticalMove(warehouse, right(end), move)
+        ']' -> canApplyWideVerticalMove(warehouse, end, move)
+                    && canApplyWideVerticalMove(warehouse, left(end), move)
+        else -> throw Exception("Unexpected move target '$atEnd'")
     }
 }
 
@@ -74,19 +74,19 @@ private fun applyWideVerticalMove(
     start: Position,
     move: Movement
 ) {
-    val oneAway = move(start)
-    val atOneAway = warehouse[oneAway.first][oneAway.second]
-    if ('[' == atOneAway) {
-        applyWideVerticalMove(warehouse, oneAway, move)
-        applyWideVerticalMove(warehouse, right(oneAway), move)
-    } else if (']' == atOneAway) {
-        applyWideVerticalMove(warehouse, oneAway, move)
-        applyWideVerticalMove(warehouse, left(oneAway), move)
-    } else if ('.' != atOneAway) {
-        throw Exception("Unexpected move target '$atOneAway'")
+    val end = move(start)
+    val atEnd = warehouse[end.first][end.second]
+    if ('[' == atEnd) {
+        applyWideVerticalMove(warehouse, end, move)
+        applyWideVerticalMove(warehouse, right(end), move)
+    } else if (']' == atEnd) {
+        applyWideVerticalMove(warehouse, end, move)
+        applyWideVerticalMove(warehouse, left(end), move)
+    } else if ('.' != atEnd) {
+        throw Exception("Unexpected move target '$atEnd'")
     }
 
-    warehouse[oneAway.first][oneAway.second] = warehouse[start.first][start.second]
+    warehouse[end.first][end.second] = warehouse[start.first][start.second]
     warehouse[start.first][start.second] = '.'
 }
 

@@ -31,19 +31,17 @@ private fun canApplyWideHorizontalMove(
 ): Boolean {
     val oneAway = move(start)
     val atOneAway = warehouse[oneAway.first][oneAway.second]
-    return if ('#' == atOneAway) {
-        false
-    } else if ('.' == atOneAway) {
-        true
-    } else {
-        val twoAway = move(oneAway)
-        val atTwoAway = warehouse[twoAway.first][twoAway.second]
-        if ('#' == atTwoAway) {
-            false
-        } else if ('.' == atTwoAway) {
-            true
-        } else {
-            canApplyWideHorizontalMove(warehouse, twoAway, move)
+    return when (atOneAway) {
+        '#' -> false
+        '.' -> true
+        else -> {
+            val twoAway = move(oneAway)
+            val atTwoAway = warehouse[twoAway.first][twoAway.second]
+            when (atTwoAway) {
+                '#' -> false
+                '.' -> true
+                else -> canApplyWideHorizontalMove(warehouse, twoAway, move)
+            }
         }
     }
 }
@@ -76,19 +74,14 @@ private fun canApplyWideVerticalMove(
     move: Movement
 ): Boolean {
     val oneAway = move(start)
-    val atOneAway = warehouse[oneAway.first][oneAway.second]
-    return if ('#' == atOneAway) {
-        false
-    } else if ('.' == atOneAway) {
-        true
-    } else if ('[' == atOneAway) {
-        canApplyWideVerticalMove(warehouse, oneAway, move)
-                && canApplyWideVerticalMove(warehouse, right(oneAway), move)
-    } else if (']' == atOneAway) {
-        canApplyWideVerticalMove(warehouse, oneAway, move)
-                && canApplyWideVerticalMove(warehouse, left(oneAway), move)
-    } else {
-        throw Exception("Unexpected move target '$atOneAway'")
+    return when (val atOneAway = warehouse[oneAway.first][oneAway.second]) {
+        '#' -> false
+        '.' -> true
+        '[' -> canApplyWideVerticalMove(warehouse, oneAway, move)
+                    && canApplyWideVerticalMove(warehouse, right(oneAway), move)
+        ']' -> canApplyWideVerticalMove(warehouse, oneAway, move)
+                    && canApplyWideVerticalMove(warehouse, left(oneAway), move)
+        else -> throw Exception("Unexpected move target '$atOneAway'")
     }
 }
 
@@ -186,8 +179,8 @@ fun main() {
             it
                 .value
                 .asSequence()
-                .map {
-                    when (it) {
+                .map { char ->
+                    when (char) {
                         '#' -> "##"
                         'O' -> "[]"
                         '.' -> ".."

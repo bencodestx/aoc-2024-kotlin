@@ -34,15 +34,7 @@ private fun canApplyWideHorizontalMove(
     return when (atOneAway) {
         '#' -> false
         '.' -> true
-        else -> {
-            val twoAway = move(oneAway)
-            val atTwoAway = warehouse[twoAway.first][twoAway.second]
-            when (atTwoAway) {
-                '#' -> false
-                '.' -> true
-                else -> canApplyWideHorizontalMove(warehouse, twoAway, move)
-            }
-        }
+        else -> canApplyWideHorizontalMove(warehouse, oneAway, move)
     }
 }
 

@@ -54,12 +54,7 @@ private fun applyWideHorizontalMove(
     val oneAway = move(start)
     val atOneAway = warehouse[oneAway.first][oneAway.second]
     if ('.' != atOneAway) {
-        val twoAway = move(oneAway)
-        val atTwoAway = warehouse[twoAway.first][twoAway.second]
-        if ('.' != atTwoAway) {
-            applyWideHorizontalMove(warehouse, twoAway, move)
-        }
-        warehouse[twoAway.first][twoAway.second] = warehouse[oneAway.first][oneAway.second]
+        applyWideHorizontalMove(warehouse, oneAway, move)
     }
     warehouse[oneAway.first][oneAway.second] = warehouse[start.first][start.second]
     warehouse[start.first][start.second] = '.'

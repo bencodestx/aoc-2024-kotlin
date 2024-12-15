@@ -1,6 +1,3 @@
-import kotlin.io.path.Path
-import kotlin.io.path.bufferedWriter
-
 private fun stepRobot(start: Pair<Position, Position>, space: Position): Pair<Position, Position> {
     var end = Position(start.first.first + start.second.first, start.first.second + start.second.second)
     if (end.first >= space.first) {
